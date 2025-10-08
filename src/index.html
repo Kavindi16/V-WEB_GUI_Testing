@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hex ↔ RGB Converter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Hex ↔ RGB Converter</h1>
+        <p class="subtitle">Convert between color formats quickly and easily</p>
+
+        <div class="converter-section">
+            <div class="converter-card">
+                <h2>Hex ➜ RGB</h2>
+                <input type="text" id="hexInput" placeholder="#RRGGBB">
+                <button id="hexConvertBtn">Convert</button>
+                <div class="output" id="rgbOutput"></div>
+            </div>
+
+            <div class="converter-card">
+                <h2>RGB ➜ Hex</h2>
+                <div class="rgb-inputs">
+                    <input type="number" id="rInput" placeholder="R" min="0" max="255">
+                    <input type="number" id="gInput" placeholder="G" min="0" max="255">
+                    <input type="number" id="bInput" placeholder="B" min="0" max="255">
+                </div>
+                <button id="rgbConvertBtn">Convert</button>
+                <div class="output" id="hexOutput"></div>
+            </div>
+        </div>
+
+        <div class="color-preview" id="colorPreview">Preview Area</div>
+    </div>
+
+    <script>
+        // Hex → RGB
+        document.getElementById("hexConvertBtn").addEventListener("click", async () => {
+            const hex = document.getElementById("hexInput").value.trim();
+            const preview = document.getElementById("colorPreview");
+            try {
+                const res = await fetch(`/hextorgb?hex=${hex}`);
+                const data = await res.json();
+                if(res.ok){
+                    document.getElementById("rgbOutput").innerText = `RGB: ${data.r}, ${data.g}, ${data.b}`;
+                    preview.style.backgroundColor = `rgb(${data.r},${data.g},${data.b})`;
+                    preview.innerText = `rgb(${data.r}, ${data.g}, ${data.b})`;
+                } else {
+                    document.getElementById("rgbOutput").innerText = `Error: ${data.error}`;
+                }
+            } catch(err) {
+                document.getElementById("rgbOutput").innerText = `Error: ${err.message}`;
+            }
+        });
+
+        // RGB → Hex
+        document.getElementById("rgbConvertBtn").addEventListener("click", () => {
+            const r = parseInt(document.getElementById("rInput").value);
+            const g = parseInt(document.getElementById("gInput").value);
+            const b = parseInt(document.getElementById("bInput").value);
+            const preview = document.getElementById("colorPreview");
+
+            if([r,g,b].some(v => isNaN(v) || v < 0 || v > 255)){
+                document.getElementById("hexOutput").innerText = "Error: Invalid RGB values";
+                return;
+            }
+
+            const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+            document.getElementById("hexOutput").innerText = `Hex: ${hex}`;
+            preview.style.backgroundColor = hex;
+            preview.innerText = hex;
+        });
+    </script>
+</body>
+</html>
+
